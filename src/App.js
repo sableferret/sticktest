@@ -1,26 +1,56 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component, PropTypes } from 'react'
+import { render } from 'react-dom'
+import ReactListView from './ReactListView';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+let styles = {
+  outerDiv: {
+    height: '420px',
+    overflowY: 'auto',
+    outline: '#b9ceb6 dashed 1px',
+    width: '383px',
+    margin: '0 auto'
+  },
+
+  ul: {
+    margin: '0px',
+    listStyleType: 'none',
+    padding: '0px'
+  },
+
+  fixedPosition: {
+    position: 'fixed',
+    width: '383px',
+    top: '0px'
+  },
+
+  listHeader: {
+    width: '383px',
+    height: '27px',
+    background: '#94D6CF',
+    color: 'white'
+  },
+
+  listItems: {
+    color: '#a9adab'
+  }
+}
+
+class App extends Component {
+/*  static propTypes = {
+    data: PropTypes.array.isRequired
+  }; */
+
+  render () {
+    const { data } = this.props
+    return (
+      <ReactListView
+        data={data}
+        headerAttName='headerName'
+        itemsAttName='items'
+        styles={styles}
+      />
+    )
+  }
 }
 
 export default App;
