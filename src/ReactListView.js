@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { findDOMNode } from 'react-dom'
 import ListHeader from './lib/ListHeader'
 import ListItems from './lib/ListItems'
 import PropTypes from 'prop-types'
@@ -19,8 +18,11 @@ export default class ReactListView extends Component {
       events: ['scroll', 'mousewheel', 'DOMMouseScroll', 'MozMousePixelScroll', 'resize', 'touchmove', 'touchend'],
       _firstChildWrapper: '',
       _headerFixedPosition: '',
-      _instances: {}
+      _headers: {}
     }
+
+ 
+    this.listView = React.createRef();
   }
 
   componentDidMount() {
@@ -31,9 +33,9 @@ export default class ReactListView extends Component {
     // unRegister events listeners with the listview div
     this.state.events.forEach((type) => {
       if (window.addEventListener) {
-        findDOMNode(this.refs.listview).removeEventListener(type, this.onScroll.bind(this), false)
+        this.listView.current.removeEventListener(type, this.onScroll.bind(this), false)
       } else {
-        findDOMNode(this.refs.listview).detachEvent('on' + type, this.onScroll.bind(this), false)
+        this.listView.current.detachEvent('on' + type, this.onScroll.bind(this), false)
       }
     })
   }
@@ -57,7 +59,7 @@ export default class ReactListView extends Component {
       return headerAndPosInfo
     })
     this.setState({
-      _instances: Object.assign(this.state._instances, { _originalPositions }),
+      _headers: _originalPositions,
       _firstChildWrapper: listHeaders[0].refs.followWrap,
       _headerFixedPosition: listHeaders[0].refs.header.getBoundingClientRect().top
     })
@@ -65,43 +67,36 @@ export default class ReactListView extends Component {
     // Register events listeners with the listview div
     this.state.events.forEach((type) => {
       if (window.addEventListener) {
-        findDOMNode(this.refs.listview).addEventListener(type, this.onScroll.bind(this), false)
+        this.listView.current.addEventListener(type, this.onScroll.bind(this), false)
       } else {
-        findDOMNode(this.refs.listview).attachEvent('on' + type, this.onScroll.bind(this), false)
+        this.listView.current.attachEvent('on' + type, this.onScroll.bind(this), false)
       }
     })
   }
 
   onScroll() {
-    // update current header positions and apply fixed positions to the top one
     let currentWindowScrollTop = this.state._headerFixedPosition - this.state._firstChildWrapper.getBoundingClientRect().top
-    this.state._instances._originalPositions.forEach((c, index) => {
-      let currentNode = c.headerObj.refs.header
-      const currentHeaderHeight = parseInt(currentNode.style.height, 10)
-      let nextNode = null
-      let topPos = null
+    this.state._headers.forEach((c, index, arr) => {
+      const currentHeader = c.headerObj.refs.header
+      const currentHeaderHeight = parseInt(currentHeader.style.height, 10)
+      const nextNode = (index < arr.length - 1) ? arr[index + 1] : null;
+ 
       let ignoreCheck = false
-      if (index < this.state._instances._originalPositions.length - 1) {
-        nextNode = this.state._instances._originalPositions[index + 1]
-      }
-      if (nextNode) {
-      }
       if (index === 0) {
         if (currentWindowScrollTop === c.originalPosition) {
-          currentNode.style.position = ''
+          currentHeader.style.position = ''
           ignoreCheck = true
         }
       }
       if (!ignoreCheck && (c.originalPosition) < (currentWindowScrollTop + this.state._headerFixedPosition + index * currentHeaderHeight)) {
-        Object.assign(currentNode.style, this.props.styles.fixedPosition)
+        Object.assign(currentHeader.style, this.props.styles.fixedPosition)
         // apply top value
-        currentNode.style.top = `${this.state._headerFixedPosition}px`
+        currentHeader.style.top = `${this.state._headerFixedPosition}px`
         if (currentWindowScrollTop + index * currentHeaderHeight > nextNode.originalPosition) {
-          currentNode.style.position = 'absolute'
-          currentNode.style.top = `${topPos}px`
+          currentHeader.style.position = 'absolute'
         }
       } else {
-        currentNode.style.position = ''
+        currentHeader.style.position = ''
       }
     })
   }
@@ -115,7 +110,7 @@ export default class ReactListView extends Component {
     }
 
     return (
-      <div ref='listview' style={outerDiv}>
+      <div ref={this.listView} style={outerDiv}>
         <ul style={ul}>
           {
             Object.keys(data).map((k) => {
