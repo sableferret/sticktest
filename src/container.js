@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
-import ListHeader from './lib/ListHeader'
-import ListItems from './lib/ListItems'
+import ListHeader from './ListHeader'
+import ListItems from './ListItems'
 
 function Container(props) {
 
@@ -26,7 +26,7 @@ function Container(props) {
 
         containerState.current = {
             _headers: headers,
-            _firstChildWrapper: firstHeaderObj ? firstHeaderObj.refs.followWrap : null,
+            _firstChildWrapper: firstHeaderObj ? firstHeaderObj.refs.headerContainer : null,
             _headerFixedPosition: firstHeaderObj ? firstHeaderObj.refs.header.getBoundingClientRect().top : 0
         };
     
@@ -60,32 +60,24 @@ function Container(props) {
         
         _headers.forEach((c, index, arr) => {
           const currentHeader = c.headerObj.refs.header
-          const currentHeaderHeight = parseInt(currentHeader.style.height, 10)
+          const headerHeight = parseInt(currentHeader.style.height, 10)
           const nextNode = (index < arr.length - 1) ? arr[index + 1] : null;
      
-          let ignoreCheck = false
-          if (index === 0) {
-            if (currentWindowScrollTop === c.originalPosition) {
-              currentHeader.style.position = ''
-              ignoreCheck = true
-            }
-          }
-          if (!ignoreCheck && (c.originalPosition) < (currentWindowScrollTop + _headerFixedPosition + index * currentHeaderHeight)) {
+          if (c.originalPosition < (currentWindowScrollTop + _headerFixedPosition + index * headerHeight)) {
             Object.assign(currentHeader.style, props.styles.fixedPosition)
             // apply top value
             currentHeader.style.top = `${_headerFixedPosition}px`
-            if (currentWindowScrollTop + index * currentHeaderHeight > nextNode.originalPosition) {
-              currentHeader.style.position = 'absolute'
-            }
+
           } else {
-            currentHeader.style.position = ''
+            currentHeader.style.position = '';
+            currentHeader.style.top = '';
           }
         })
     };
 
-    let _refi = 0
+    let _refIndex = 0
     let makeRef = (elem) => {
-        headerRefs[`ListHeader-${_refi++}`] = elem;
+        headerRefs[`ListHeader-${_refIndex++}`] = elem;
     }
 
     const { data, headerAttName, itemsAttName } = props

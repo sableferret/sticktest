@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react'
-import { render } from 'react-dom'
-import ReactListView from './ReactListView';
+
 import { Container } from './container';
 
 let styles = {
